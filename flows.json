@@ -1,0 +1,222 @@
+[
+    {
+        "id": "402d11fb8a9a035a",
+        "type": "tab",
+        "label": "Flow 3",
+        "disabled": true,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "c604be973bef027d",
+        "type": "Bme280",
+        "z": "402d11fb8a9a035a",
+        "name": "",
+        "bus": "1",
+        "address": "0x76",
+        "topic": "temp_stats",
+        "extra": false,
+        "preasure": 1013.25,
+        "x": 360,
+        "y": 280,
+        "wires": [
+            [
+                "7c4e92007a1518f7"
+            ]
+        ]
+    },
+    {
+        "id": "7772d1087f216f1d",
+        "type": "inject",
+        "z": "402d11fb8a9a035a",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": false,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 180,
+        "y": 280,
+        "wires": [
+            [
+                "c604be973bef027d"
+            ]
+        ]
+    },
+    {
+        "id": "7c4e92007a1518f7",
+        "type": "function",
+        "z": "402d11fb8a9a035a",
+        "name": "feels-like-calc",
+        "func": "const temp = 1.8 * msg.payload.temperature_C + 32;\nconst hum = msg.payload.humidity;\nconst pres = -42.379 + 2.04901523 * temp + 10.14333127 * hum - .22475541 * temp * hum - .00683783 * temp * temp - .05481717 * hum * hum + .00122874 * temp * temp * hum + .00085282 * temp * hum * hum - .00000199 * temp * temp * hum * hum;\nlet press = 0;\n\nif (hum < 13 && temp > 80 && temp < 112) {\n  press = pres - ((13 - hum) / 4) * (Math.sqrt(17 - Math.abs(temp - 95) / 17));\n} else if (hum > 85 && temp > 80 && temp < 87) {\n  press = pres + ((hum - 85) / 10) * ((87 - temp) / 5);\n} else {\n  press = pres;\n}\n\npress = ((press - 32) * 5) / 9;\nmsg.payload.apparent = press;\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 560,
+        "y": 280,
+        "wires": [
+            [
+                "92dd7e2f025e3a22",
+                "9f22c5777c390930",
+                "f93a7d9488f9801c",
+                "461806f146ab726d"
+            ]
+        ]
+    },
+    {
+        "id": "92dd7e2f025e3a22",
+        "type": "debug",
+        "z": "402d11fb8a9a035a",
+        "name": "debug 3",
+        "active": false,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "true",
+        "targetType": "full",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 780,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "9f22c5777c390930",
+        "type": "function",
+        "z": "402d11fb8a9a035a",
+        "name": "temp-filter",
+        "func": "msg.payload=msg.payload.temperature_C\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 780,
+        "y": 280,
+        "wires": [
+            [
+                "846e755995b7b818"
+            ]
+        ]
+    },
+    {
+        "id": "f93a7d9488f9801c",
+        "type": "function",
+        "z": "402d11fb8a9a035a",
+        "name": "humid-filter",
+        "func": "msg.payload=msg.payload.humidity\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 790,
+        "y": 340,
+        "wires": [
+            [
+                "9ed5fe78bcab581d"
+            ]
+        ]
+    },
+    {
+        "id": "461806f146ab726d",
+        "type": "function",
+        "z": "402d11fb8a9a035a",
+        "name": "atemp-filter",
+        "func": "msg.payload=msg.payload.apparent\nreturn msg;",
+        "outputs": 1,
+        "timeout": 0,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 790,
+        "y": 400,
+        "wires": [
+            [
+                "e73a0f1fb5749971"
+            ]
+        ]
+    },
+    {
+        "id": "846e755995b7b818",
+        "type": "influxdb out",
+        "z": "402d11fb8a9a035a",
+        "influxdb": "2fc602f54109c33b",
+        "name": "",
+        "measurement": "temp",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "organisation",
+        "bucket": "bucket",
+        "x": 1050,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "9ed5fe78bcab581d",
+        "type": "influxdb out",
+        "z": "402d11fb8a9a035a",
+        "influxdb": "2fc602f54109c33b",
+        "name": "",
+        "measurement": "humid",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "organisation",
+        "bucket": "bucket",
+        "x": 1060,
+        "y": 340,
+        "wires": []
+    },
+    {
+        "id": "e73a0f1fb5749971",
+        "type": "influxdb out",
+        "z": "402d11fb8a9a035a",
+        "influxdb": "2fc602f54109c33b",
+        "name": "",
+        "measurement": "atemp",
+        "precision": "",
+        "retentionPolicy": "",
+        "database": "database",
+        "precisionV18FluxV20": "ms",
+        "retentionPolicyV18Flux": "",
+        "org": "organisation",
+        "bucket": "bucket",
+        "x": 1060,
+        "y": 400,
+        "wires": []
+    },
+    {
+        "id": "2fc602f54109c33b",
+        "type": "influxdb",
+        "hostname": "192.168.1.62",
+        "port": "8086",
+        "protocol": "http",
+        "database": "room1",
+        "name": "",
+        "usetls": false,
+        "tls": "",
+        "influxdbVersion": "1.x",
+        "url": "http://localhost:8086",
+        "timeout": "10",
+        "rejectUnauthorized": true
+    }
+]
